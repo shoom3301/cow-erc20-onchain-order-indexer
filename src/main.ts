@@ -106,13 +106,18 @@ async function main(): Promise<void> {
     },
   });
 
-  const shutdown = (sig: string) => {
+  const shutdown = async (sig: string): Promise<void> => {
     log.info(`received ${sig}; shutting down`);
     unwatch();
+    try {
+      await processing;
+    } catch (err) {
+      log.error("error while draining in-flight batch", err);
+    }
     process.exit(0);
   };
-  process.on("SIGINT", () => shutdown("SIGINT"));
-  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => { void shutdown("SIGINT"); });
+  process.on("SIGTERM", () => { void shutdown("SIGTERM"); });
 }
 
 main().catch((err) => {
