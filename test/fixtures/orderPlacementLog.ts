@@ -1,8 +1,8 @@
 // A hand-crafted OrderPlacement log used by eventDecoder tests.
 //
 // The data is ABI-encoded according to the event ABI in src/abi.ts. The trailing
-// `bytes data` field within the event holds `abi.encodePacked(int64 quoteId, uint32 outerValidTo)`
-// (12 bytes) as emitted by CoWSwapErc20Flow.createOrder.
+// `bytes data` field within the event holds `abi.encodePacked(int64 quoteId)`
+// (8 bytes) as emitted by CoWSwapErc20Flow.createOrder.
 //
 // To regenerate from a real onchain event, use:
 //   cast logs --rpc-url $RPC_HTTP_URL \
@@ -29,7 +29,7 @@ export const fixtureSellToken = SELL;
 export const fixtureBuyToken  = BUY;
 export const fixtureReceiver  = RECEIVER;
 export const fixtureQuoteId   = 123n;
-export const fixtureOuterValidTo = 1747083600; // 2026-05-12T13:00:00Z-ish
+export const fixtureValidTo   = 1779645073; // ~2026-05-22
 
 export const fixtureOrder = {
   sellToken: SELL,
@@ -37,7 +37,7 @@ export const fixtureOrder = {
   receiver:  RECEIVER,
   sellAmount: 10n ** 16n,           // 0.01 sellToken (1e16)
   buyAmount:  10_000_000n,          // 10 USDC (6 decimals)
-  validTo:    0xffffffff,
+  validTo:    fixtureValidTo,
   appData:    "0x4242424242424242424242424242424242424242424242424242424242424242" as `0x${string}`,
   feeAmount:  0n,
   kind:       KIND_SELL,
@@ -51,10 +51,7 @@ export const fixtureSignature = {
   data: FLOW_ADDR.toLowerCase() as `0x${string}`,
 };
 
-const dataBlob = encodePacked(
-  ["int64", "uint32"],
-  [fixtureQuoteId, fixtureOuterValidTo],
-);
+const dataBlob = encodePacked(["int64"], [fixtureQuoteId]);
 
 const eventData = encodeAbiParameters(
   [

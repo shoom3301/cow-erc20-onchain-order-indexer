@@ -78,7 +78,7 @@ struct GPv2Order.Data {
     address receiver;
     uint256 sellAmount;
     uint256 buyAmount;
-    uint32  validTo;          // always type(uint32).max for ERC-20 flow
+    uint32  validTo;          // the real user-chosen expiry; enforced by settlement
     bytes32 appData;
     uint256 feeAmount;        // always 0
     bytes32 kind;             // KIND_SELL (keccak256("sell"))
@@ -97,14 +97,13 @@ Indexed: only `sender`. All other fields are in the data section. Event topic ha
 
 ### 5.2 The trailing `bytes data` blob
 
-The flow contract encodes `data` as `abi.encodePacked(int64 quoteId, uint32 outerValidTo)` — 12 bytes:
+The flow contract encodes `data` as `abi.encodePacked(int64 quoteId)` — 8 bytes:
 
 | Bytes  | Field         | Type   |
 |--------|---------------|--------|
 | 0..8   | `quoteId`     | int64  |
-| 8..12  | `outerValidTo`| uint32 |
 
-`outerValidTo` is the real order expiry the orderbook should enforce. The inner `order.validTo` (always `0xffffffff`) is a sentinel that disables expiry in settlement.
+The order's real expiry now lives in `order.validTo` itself (no longer a sentinel), so no additional trailing field is needed.
 
 `eventDecoder.ts` returns:
 
@@ -118,7 +117,6 @@ type DecodedOrderPlacement = {
   order:       GPv2Order;
   signature:   { scheme: 0 | 1; data: `0x${string}` };
   quoteId:     bigint;
-  outerValidTo: number;
 };
 ```
 
@@ -133,7 +131,7 @@ Built from a decoded event:
   receiver:          order.receiver,
   sellAmount:        order.sellAmount.toString(),
   buyAmount:         order.buyAmount.toString(),
-  validTo:           outerValidTo,                  // from the data blob, NOT order.validTo
+  validTo:           order.validTo,                 // real expiry, same as on-chain
   appData:           order.appData,                 // 32-byte hash hex
   feeAmount:         "0",
   kind:              OrderKind.SELL,
@@ -208,7 +206,7 @@ Notes:
 | `getLogs` / decode failure on a batch | Log error with block range; retry whole batch with shorter chunk size; halt if still failing after 3 attempts |
 | `OrderBookApi` 5xx / network error | Retry up to 3× with backoff (500ms, 1s, 2s); if still failing, halt + exit non-zero |
 | `OrderBookApi` 4xx (incl. "order already exists") | Log + skip; advance cursor; record orderUid as processed |
-| Malformed event data blob (length ≠ 12 bytes) | Log + skip; advance cursor; record orderUid as processed (event is malformed, retrying won't help) |
+| Malformed event data blob (length ≠ 8 bytes) | Log + skip; advance cursor; record orderUid as processed (event is malformed, retrying won't help) |
 | Cursor file write fails | Halt + exit non-zero (continuing without persistence is unsafe) |
 | `SIGINT` / `SIGTERM` | Stop accepting new events, finish in-flight POST, flush cursor, exit cleanly |
 
@@ -228,7 +226,7 @@ Notes:
 
 ## 10. Testing strategy
 
-- **`eventDecoder.test.ts`** — canned raw log fixtures from `cast logs` on the live contract; assert decoded shape and `quoteId` / `outerValidTo` extraction.
+- **`eventDecoder.test.ts`** — canned raw log fixtures from `cast logs` on the live contract; assert decoded shape and `quoteId` extraction (incl. two's-complement int64).
 - **`orderBuilder.test.ts`** — golden-fixture comparison between a decoded event and the produced orderbook payload.
 - **`cursor.test.ts`** — round-trip save/load; atomic write (write-temp-then-rename); corrupted file → clean error.
 - **`cowOrderbook.test.ts`** — mock `OrderBookApi.sendOrder`; verify retry on 5xx, skip on 4xx, halt on persistent 5xx.

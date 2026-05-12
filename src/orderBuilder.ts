@@ -32,7 +32,7 @@ export function buildOrderPayload(
     receiver: decoded.order.receiver,
     sellAmount: decoded.order.sellAmount.toString(),
     buyAmount: decoded.order.buyAmount.toString(),
-    validTo: decoded.outerValidTo,
+    validTo: decoded.order.validTo,
     appData: decoded.order.appData,
     feeAmount: "0",
     kind: "sell",

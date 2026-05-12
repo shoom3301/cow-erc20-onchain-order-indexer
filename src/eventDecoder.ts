@@ -30,14 +30,12 @@ export interface DecodedOrderPlacement {
   order: DecodedOrder;
   signature: DecodedSignature;
   quoteId: bigint;
-  outerValidTo: number;
 }
 
-const DATA_BLOB_LEN = 8 /* int64 */ + 4; /* uint32 */
+const DATA_BLOB_LEN = 8; /* int64 quoteId */
 
 export function parseDataBlob(blob: `0x${string}`): {
   quoteId: bigint;
-  outerValidTo: number;
 } {
   // 0x + 2 hex chars/byte
   const hex = blob.slice(2);
@@ -46,18 +44,14 @@ export function parseDataBlob(blob: `0x${string}`): {
       `Unexpected data blob length: got ${hex.length / 2} bytes, want ${DATA_BLOB_LEN}`,
     );
   }
-  const quoteIdHex = hex.slice(0, 16);
-  const validToHex = hex.slice(16, 24);
-
   // Parse int64 as two's complement.
-  const quoteIdUnsigned = BigInt("0x" + quoteIdHex);
+  const quoteIdUnsigned = BigInt("0x" + hex);
   const SIGN_BIT = 1n << 63n;
-  const MASK = (1n << 64n);
+  const MASK = 1n << 64n;
   const quoteId =
     quoteIdUnsigned & SIGN_BIT ? quoteIdUnsigned - MASK : quoteIdUnsigned;
 
-  const outerValidTo = Number(BigInt("0x" + validToHex));
-  return { quoteId, outerValidTo };
+  return { quoteId };
 }
 
 export function decodeOrderPlacementLog(
@@ -80,7 +74,7 @@ export function decodeOrderPlacementLog(
     data: `0x${string}`;
   };
 
-  const { quoteId, outerValidTo } = parseDataBlob(typedArgs.data);
+  const { quoteId } = parseDataBlob(typedArgs.data);
 
   return {
     blockNumber: raw.blockNumber ?? 0n,
@@ -94,6 +88,5 @@ export function decodeOrderPlacementLog(
       data: typedArgs.signature.data,
     },
     quoteId,
-    outerValidTo,
   };
 }

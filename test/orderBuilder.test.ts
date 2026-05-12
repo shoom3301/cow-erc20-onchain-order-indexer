@@ -5,7 +5,7 @@ import {
   fixtureLog,
   fixtureOrder,
   fixtureQuoteId,
-  fixtureOuterValidTo,
+  fixtureValidTo,
 } from "./fixtures/orderPlacementLog.js";
 
 const FLOW_ADDR = "0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70" as const;
@@ -23,8 +23,8 @@ describe("buildOrderPayload", () => {
     expect(payload.appData).toBe(fixtureOrder.appData);
   });
 
-  it("uses outerValidTo from the data blob, NOT the inner sentinel validTo", () => {
-    expect(payload.validTo).toBe(fixtureOuterValidTo);
+  it("uses order.validTo from the event (the real expiry, settlement-enforced)", () => {
+    expect(payload.validTo).toBe(fixtureValidTo);
     expect(payload.validTo).not.toBe(0xffffffff);
   });
 

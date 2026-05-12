@@ -6,7 +6,6 @@ import {
   fixtureOrder,
   fixtureSignature,
   fixtureQuoteId,
-  fixtureOuterValidTo,
 } from "./fixtures/orderPlacementLog.js";
 
 describe("decodeOrderPlacementLog", () => {
@@ -34,7 +33,6 @@ describe("decodeOrderPlacementLog", () => {
       fixtureSignature.data.toLowerCase(),
     );
     expect(decoded.quoteId).toBe(fixtureQuoteId);
-    expect(decoded.outerValidTo).toBe(fixtureOuterValidTo);
     expect(decoded.blockNumber).toBe(fixtureLog.blockNumber);
     expect(decoded.txHash).toBe(fixtureLog.transactionHash);
     expect(decoded.logIndex).toBe(fixtureLog.logIndex);
@@ -44,21 +42,18 @@ describe("decodeOrderPlacementLog", () => {
 import { parseDataBlob } from "../src/eventDecoder.js";
 
 describe("parseDataBlob", () => {
-  it("parses {quoteId, outerValidTo} from 12 packed bytes", () => {
-    // int64(123) || uint32(1747083600)
-    const blob =
-      "0x000000000000007b6822c190" as `0x${string}`;
-    const { quoteId, outerValidTo } = parseDataBlob(blob);
+  it("parses {quoteId} from 8 packed bytes", () => {
+    // int64(123)
+    const blob = "0x000000000000007b" as `0x${string}`;
+    const { quoteId } = parseDataBlob(blob);
     expect(quoteId).toBe(123n);
-    expect(outerValidTo).toBe(0x6822c190);
   });
 
   it("handles negative quoteId (two's complement int64)", () => {
-    // int64(-1) || uint32(0)
-    const blob = "0xffffffffffffffff00000000" as `0x${string}`;
-    const { quoteId, outerValidTo } = parseDataBlob(blob);
+    // int64(-1)
+    const blob = "0xffffffffffffffff" as `0x${string}`;
+    const { quoteId } = parseDataBlob(blob);
     expect(quoteId).toBe(-1n);
-    expect(outerValidTo).toBe(0);
   });
 
   it("throws on wrong length", () => {
