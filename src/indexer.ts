@@ -1,4 +1,4 @@
-import type { Log, PublicClient } from "viem";
+import type { AbiEvent, Log, PublicClient } from "viem";
 import { log } from "./log.js";
 import { decodeOrderPlacementLog } from "./eventDecoder.js";
 import { buildOrderPayload } from "./orderBuilder.js";
@@ -96,13 +96,15 @@ export async function backfill(params: BackfillParams): Promise<void> {
     const end = start + chunkSize - 1n > toBlock ? toBlock : start + chunkSize - 1n;
     const logs = await httpClient.getLogs({
       address: flowAddress,
-      event: orderPlacementEvent as Parameters<typeof httpClient.getLogs>[0]["event"],
+      event: orderPlacementEvent as AbiEvent,
       fromBlock: start,
       toBlock: end,
     });
     logs.sort((a, b) => {
-      const bd = (a.blockNumber ?? 0n) - (b.blockNumber ?? 0n);
-      if (bd !== 0n) return bd < 0n ? -1 : 1;
+      const an = a.blockNumber ?? 0n;
+      const bn = b.blockNumber ?? 0n;
+      if (an < bn) return -1;
+      if (an > bn) return 1;
       return (a.logIndex ?? 0) - (b.logIndex ?? 0);
     });
     for (const raw of logs) {
