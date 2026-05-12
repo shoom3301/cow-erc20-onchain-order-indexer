@@ -66,26 +66,20 @@ async function main(): Promise<void> {
 
   // 3. Subscribe to live events. Each callback receives a batch.
   log.info("subscribing to live events", { fromBlock: cursor.lastProcessedBlock + 1n });
+  let processing: Promise<void> = Promise.resolve();
   const unwatch = ws.watchContractEvent({
     address: config.flowAddress,
     abi: [orderPlacementEvent],
     eventName: "OrderPlacement",
     onLogs: (logs) => {
-      void (async () => {
-        // Defer events that haven't reached the confirmation depth yet by
-        // re-checking head; cheap because the ws client caches block subscriptions.
+      processing = processing.then(async () => {
         const currentHead = await httpClient.getBlockNumber();
         for (const raw of logs) {
           const blockNumber = raw.blockNumber ?? 0n;
           const lag = currentHead - blockNumber;
           if (lag < BigInt(config.confirmations)) {
-            // Wait for the block to mature. Polling-style sleep is fine here —
-            // Sepolia blocks are ~12s, so a 12s sleep at most.
             const waitMs = Number(BigInt(config.confirmations) - lag) * 12_000;
-            log.info("waiting for confirmations", {
-              blockNumber,
-              waitMs,
-            });
+            log.info("waiting for confirmations", { blockNumber, waitMs });
             await new Promise((r) => setTimeout(r, waitMs));
           }
           const outcome = await handleLog(raw, config.flowAddress, api);
@@ -93,7 +87,7 @@ async function main(): Promise<void> {
             log.error("halting due to persistent orderbook failure", undefined, {
               blockNumber,
             });
-            throw new Error("orderbook unavailable; exiting");
+            process.exit(1);
           }
           if (raw.blockNumber !== undefined && raw.blockNumber !== null) {
             if (raw.blockNumber > cursor.lastProcessedBlock) {
@@ -102,7 +96,10 @@ async function main(): Promise<void> {
             }
           }
         }
-      })();
+      }).catch((err) => {
+        log.error("indexer crashed in live subscription", err);
+        process.exit(1);
+      });
     },
     onError: (err) => {
       log.error("watchContractEvent error", err);
