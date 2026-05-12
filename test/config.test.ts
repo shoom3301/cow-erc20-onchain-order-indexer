@@ -11,7 +11,7 @@ describe("loadConfig", () => {
     const cfg = loadConfig(baseEnv);
     expect(cfg.rpcWsUrl).toBe("wss://example/ws");
     expect(cfg.rpcHttpUrl).toBe("https://example/http");
-    expect(cfg.flowAddress).toBe("0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70");
+    expect(cfg.flowAddress).toBe("0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe");
     expect(cfg.chainId).toBe(11155111);
     expect(cfg.deployBlock).toBe(10838355n);
     expect(cfg.confirmations).toBe(12);

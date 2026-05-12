@@ -7,7 +7,7 @@
 
 ## 1. Goal
 
-A standalone, long-running Node/TypeScript daemon that listens for `OrderPlacement` events emitted by the deployed `CoWSwapErc20Flow` contract on Sepolia (`0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70`, chain `11155111`) and POSTs each as an EIP-1271 order to the CoW Protocol orderbook (`https://api.cow.fi/sepolia`). Functionally equivalent to CoW's own eth-flow indexer, but for the ERC-20 flow contract.
+A standalone, long-running Node/TypeScript daemon that listens for `OrderPlacement` events emitted by the deployed `CoWSwapErc20Flow` contract on Sepolia (`0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe`, chain `11155111`) and POSTs each as an EIP-1271 order to the CoW Protocol orderbook (`https://api.cow.fi/sepolia`). Functionally equivalent to CoW's own eth-flow indexer, but for the ERC-20 flow contract.
 
 ## 2. Non-goals
 
@@ -216,7 +216,7 @@ Notes:
 |-----|---------|---------|
 | `RPC_WS_URL`    | *(required)* | viem WebSocket transport URL (Sepolia) |
 | `RPC_HTTP_URL`  | *(required)* | viem HTTP transport for `getLogs` backfill |
-| `FLOW_ADDRESS`  | `0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70` | Deployed `CoWSwapErc20Flow` |
+| `FLOW_ADDRESS`  | `0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe` | Deployed `CoWSwapErc20Flow` |
 | `CHAIN_ID`      | `11155111` | Sepolia |
 | `DEPLOY_BLOCK`  | `10838355` | First block to consider on a fresh cursor |
 | `CONFIRMATIONS` | `12` | Confirmation depth before posting |

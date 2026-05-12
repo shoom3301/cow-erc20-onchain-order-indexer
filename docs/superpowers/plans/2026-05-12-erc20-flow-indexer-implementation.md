@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a Node/TypeScript daemon that listens for `OrderPlacement` events emitted by the deployed `CoWSwapErc20Flow` contract on Sepolia (`0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70`) and posts each as an EIP-1271 order to the CoW Protocol orderbook via `@cowprotocol/cow-sdk`.
+**Goal:** Build a Node/TypeScript daemon that listens for `OrderPlacement` events emitted by the deployed `CoWSwapErc20Flow` contract on Sepolia (`0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe`) and posts each as an EIP-1271 order to the CoW Protocol orderbook via `@cowprotocol/cow-sdk`.
 
 **Architecture:** Single long-running process. On startup: load cursor JSON → paginated `eth_getLogs` backfill from `lastProcessedBlock + 1` to `head − CONFIRMATIONS` → viem WebSocket subscription for new events. Each event is decoded, mapped to a CoW orderbook payload, and POSTed via the SDK. The cursor only stores `lastProcessedBlock`; idempotency on the API side (CoW returns 4xx for duplicate orders) makes re-processing the in-flight block on restart safe — simpler than tracking processed orderUids as the spec proposed.
 
@@ -166,7 +166,7 @@ RPC_WS_URL=wss://ethereum-sepolia-rpc.publicnode.com
 RPC_HTTP_URL=https://ethereum-sepolia-rpc.publicnode.com
 
 # Optional: defaults assume Sepolia + the canonical deployment
-FLOW_ADDRESS=0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70
+FLOW_ADDRESS=0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe
 CHAIN_ID=11155111
 DEPLOY_BLOCK=10838355
 CONFIRMATIONS=12
@@ -501,7 +501,7 @@ describe("loadConfig", () => {
     const cfg = loadConfig(baseEnv);
     expect(cfg.rpcWsUrl).toBe("wss://example/ws");
     expect(cfg.rpcHttpUrl).toBe("https://example/http");
-    expect(cfg.flowAddress).toBe("0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70");
+    expect(cfg.flowAddress).toBe("0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe");
     expect(cfg.chainId).toBe(11155111);
     expect(cfg.deployBlock).toBe(10838355n);
     expect(cfg.confirmations).toBe(12);
@@ -593,7 +593,7 @@ export interface Config {
 }
 
 const DEFAULTS = {
-  FLOW_ADDRESS: "0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70",
+  FLOW_ADDRESS: "0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe",
   CHAIN_ID: "11155111",
   DEPLOY_BLOCK: "10838355",
   CONFIRMATIONS: "12",
@@ -841,7 +841,7 @@ Path: `/Users/shoom/IdeaProjects/cow-erc20-onchain-order-indexer/test/fixtures/o
 // To regenerate from a real onchain event, use:
 //   cast logs --rpc-url $RPC_HTTP_URL \
 //     --from-block 10838355 \
-//     --address 0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70 \
+//     --address 0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe \
 //     "OrderPlacement(address,((address,address,address,uint256,uint256,uint32,bytes32,uint256,bytes32,bool,bytes32,bytes32),(uint8,bytes),bytes))"
 // and paste the topics + data below.
 
@@ -851,7 +851,7 @@ const SENDER = "0xfb3c7eb936caa12b5a884d612393969a557d4307" as const;
 const SELL  = "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14" as const; // Sepolia WETH
 const BUY   = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238" as const; // Sepolia USDC (random pick)
 const RECEIVER = "0xAAaaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa" as const;
-const FLOW_ADDR = "0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70" as const;
+const FLOW_ADDR = "0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe" as const;
 
 const KIND_SELL =
   "0xf3b277728b3fee749481eb3e0b3b48980dbbab78658fc419025cb16eee346775" as const;
@@ -1166,7 +1166,7 @@ import {
   fixtureOuterValidTo,
 } from "./fixtures/orderPlacementLog.js";
 
-const FLOW_ADDR = "0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70" as const;
+const FLOW_ADDR = "0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe" as const;
 
 describe("buildOrderPayload", () => {
   const decoded = decodeOrderPlacementLog(fixtureLog);
@@ -1594,7 +1594,7 @@ import { handleLog } from "../src/indexer.js";
 import type { OrderBookLike } from "../src/cowOrderbook.js";
 import { fixtureLog } from "./fixtures/orderPlacementLog.js";
 
-const FLOW_ADDR = "0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70" as const;
+const FLOW_ADDR = "0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe" as const;
 
 describe("handleLog", () => {
   it("decodes, builds, and posts on the happy path", async () => {

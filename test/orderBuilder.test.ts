@@ -8,7 +8,7 @@ import {
   fixtureValidTo,
 } from "./fixtures/orderPlacementLog.js";
 
-const FLOW_ADDR = "0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70" as const;
+const FLOW_ADDR = "0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe" as const;
 
 describe("buildOrderPayload", () => {
   const decoded = decodeOrderPlacementLog(fixtureLog);

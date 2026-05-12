@@ -16,7 +16,7 @@ export interface Config {
 }
 
 const DEFAULTS = {
-  FLOW_ADDRESS: "0x55cbada3d2db7f789a7bc1f2a72f1d487aa30b70",
+  FLOW_ADDRESS: "0x9288e2a30d5a14622eb70c3af2ad1f1cfbbadfbe",
   CHAIN_ID: "11155111",
   DEPLOY_BLOCK: "10838355",
   CONFIRMATIONS: "12",
