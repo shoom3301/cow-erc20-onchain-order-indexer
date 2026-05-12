@@ -1,0 +1,30 @@
+{
+  "name": "cow-erc20-onchain-order-indexer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Indexer that posts CoWSwapErc20Flow OrderPlacement events to the CoW Protocol orderbook.",
+  "license": "LGPL-3.0-or-later",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "start:prod": "node dist/main.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@cowprotocol/cow-sdk": "^5.0.0",
+    "dotenv": "^16.4.5",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}
